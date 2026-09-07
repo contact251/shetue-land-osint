@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Shetue Land OSINT Toolkit - Production Land Management, Cadastral GIS, Satellite Remote Sensing, Title Due Diligence & Cryptographic Evidence Vault">
+  <meta name="keywords" content="Land OSINT, Cadastral GIS, Khatian, Deed Chain, Mutation, Satellite Evidence, DGPS Survey, Bangladesh Land Records">
+  <meta name="author" content="Shetue Land Intelligence Group">
+  <title>Shetue Land OSINT Toolkit - Production Geospatial & Title Platform</title>
+
+  <!-- Leaflet CSS for GIS Mapping -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Core Design System CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">S</div>
+        <div>
+          <div class="brand-title">SHETUE OSINT</div>
+          <div class="brand-subtitle">Land Intelligence</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Core Registers</div>
+        <a class="nav-link active" data-view="dashboard" id="nav-dashboard">
+          <span class="nav-icon">📊</span>
+          <span>Land Register</span>
+        </a>
+        <a class="nav-link" data-view="records" id="nav-records">
+          <span class="nav-icon">📜</span>
+          <span>Official Records</span>
+          <span class="nav-badge">CS&bull;RS&bull;BS</span>
+        </a>
+
+        <div class="nav-section-title">Geospatial & Field</div>
+        <a class="nav-link" data-view="gis" id="nav-gis">
+          <span class="nav-icon">🛰️</span>
+          <span>GIS & Mouza Maps</span>
+        </a>
+        <a class="nav-link" data-view="satellite" id="nav-satellite">
+          <span class="nav-icon">🛰️</span>
+          <span>Satellite OSINT</span>
+          <span class="nav-badge">Slider</span>
+        </a>
+        <a class="nav-link" data-view="survey" id="nav-survey">
+          <span class="nav-icon">📍</span>
+          <span>Field Survey</span>
+        </a>
+
+        <div class="nav-section-title">Legal & Forensics</div>
+        <a class="nav-link" data-view="disputes" id="nav-disputes">
+          <span class="nav-icon">⚖️</span>
+          <span>Dispute Docket</span>
+          <span class="nav-badge danger" id="sidebar-dispute-badge">1 Active</span>
+        </a>
+        <a class="nav-link" data-view="vault" id="nav-vault">
+          <span class="nav-icon">🛡️</span>
+          <span>Evidence Vault</span>
+          <span class="nav-badge">SHA-256</span>
+        </a>
+
+        <div class="nav-section-title">Analysis & Tools</div>
+        <a class="nav-link" data-view="reports" id="nav-reports">
+          <span class="nav-icon">📑</span>
+          <span>Reports & Calc</span>
+        </a>
+        <a class="nav-link" data-view="admin" id="nav-admin">
+          <span class="nav-icon">⚙️</span>
+          <span>Admin & Database</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="live-indicator">
+          <span class="pulse-dot"></span> SECURE VAULT
+        </span>
+        <span style="font-family:'JetBrains Mono'; font-size:11px;">v2.4 LTS</span>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="main-content">
+      <!-- TOP APP HEADER -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="menu-toggle" id="menu-toggle-btn" aria-label="Toggle Navigation">☰</button>
+          <div class="page-title-group">
+            <h1 id="current-view-title">Portfolio Command Center</h1>
+            <div class="page-breadcrumb">Shetue Institutional Land Repository / Production Vault</div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="header-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="global-search-input" placeholder="Search Dag, Owner, Mouza...">
+          </div>
+          <div style="font-family:'JetBrains Mono'; font-size:12px; color:#94a3b8;" id="header-live-time">11:30:00 UTC+6</div>
+          <button class="btn btn-primary btn-sm" onclick="window.AdminManager.openAddParcelModal()">+ Add Parcel</button>
+        </div>
+      </header>
+
+      <!-- VIEW CONTAINER -->
+      <div class="view-container">
+
+        <!-- ====================================================================
+             VIEW 1: DASHBOARD / LAND REGISTER
+             ==================================================================== -->
+        <section class="view-section active" id="dashboard-view">
+          <!-- KPI Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card accent-emerald">
+              <div class="stat-header">
+                <span class="stat-label">Total Holdings</span>
+                <span class="stat-icon">🏛️</span>
+              </div>
+              <div class="stat-value" id="kpi-total-parcels">3</div>
+              <div class="stat-sub">Across Dhaka & Metropolitan Zones</div>
+            </div>
+
+            <div class="stat-card accent-indigo">
+              <div class="stat-header">
+                <span class="stat-label">Total Land Area</span>
+                <span class="stat-icon">📐</span>
+              </div>
+              <div class="stat-value" id="kpi-total-decimals">49.50 Dec</div>
+              <div class="stat-sub" id="kpi-total-acres">0.4950 Acres</div>
+            </div>
+
+            <div class="stat-card accent-emerald">
+              <div class="stat-header">
+                <span class="stat-label">Title Cleanliness</span>
+                <span class="stat-icon">✓</span>
+              </div>
+              <div class="stat-value" id="kpi-clear-pct">66.7% Clear</div>
+              <div class="stat-sub">Unbroken CS-to-BS continuity</div>
+            </div>
+
+            <div class="stat-card accent-red">
+              <div class="stat-header">
+                <span class="stat-label">Disputed Holdings</span>
+                <span class="stat-icon">⚠️</span>
+              </div>
+              <div class="stat-value" id="kpi-disputed-count" style="color:#f87171;">1 Flagged</div>
+              <div class="stat-sub">Under active litigation (Title Suit)</div>
+            </div>
+          </div>
+
+          <!-- Master Land Register Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>📁 Master Land Register (Authoritative Source of Truth)</span>
+              </div>
+              <div class="panel-actions">
+                <button class="btn btn-secondary btn-sm" onclick="window.app.renderAllTables()">↻ Refresh</button>
+                <button class="btn btn-primary btn-sm" onclick="window.AdminManager.openAddParcelModal()">+ New Parcel</button>
+              </div>
+            </div>
+            <div class="panel-body table-responsive">
+              <table class="data-table" id="master-register-table">
+                <thead>
+                  <tr>
+                    <th>Parcel ID</th>
+                    <th>Mouza & JL</th>
+                    <th>Survey Dags (RS/BS)</th>
+                    <th>Area</th>
+                    <th>Class</th>
+                    <th>Recorded Owner</th>
+                    <th>Mutation No</th>
+                    <th>Tax Clearance</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Populated dynamically by app.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 2: OFFICIAL GOVERNMENT RECORDS
+             ==================================================================== -->
+        <section class="view-section" id="records-view">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Official Land Records Suite</div>
+              <div class="panel-actions">
+                <div style="display:flex; gap:8px;">
+                  <button class="btn btn-secondary btn-sm record-subtab-btn active" data-subtab="subtab-khatian">Khatian (Porcha)</button>
+                  <button class="btn btn-secondary btn-sm record-subtab-btn" data-subtab="subtab-deed">Deed (Dalil)</button>
+                  <button class="btn btn-secondary btn-sm record-subtab-btn" data-subtab="subtab-mutation">Mutation (Namjari)</button>
+                  <button class="btn btn-secondary btn-sm record-subtab-btn" data-subtab="subtab-tax">Tax (Dakhila)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subtab: Khatian -->
+            <div class="panel-body record-subtab-content" id="subtab-khatian">
+              <h3 style="font-family:'Outfit',sans-serif; margin-bottom:14px; color:#fff;">Historical Record of Rights (CS &bull; SA &bull; RS &bull; BS)</h3>
+              <div class="table-responsive">
+                <table class="data-table" id="khatian-table">
+                  <thead>
+                    <tr>
+                      <th>Khatian ID</th>
+                      <th>Survey</th>
+                      <th>Khatian No</th>
+                      <th>Mouza</th>
+                      <th>Associated Dags</th>
+                      <th>Recorded Tenant(s)</th>
+                      <th>Area</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Subtab: Deed -->
+            <div class="panel-body record-subtab-content" id="subtab-deed" style="display:none;">
+              <h3 style="font-family:'Outfit',sans-serif; margin-bottom:14px; color:#fff;">Chain of Title Conveyance Deeds (30+ Year Continuous Record)</h3>
+              <div class="table-responsive">
+                <table class="data-table" id="deed-table">
+                  <thead>
+                    <tr>
+                      <th>Deed ID</th>
+                      <th>Deed & Year</th>
+                      <th>Registration Office</th>
+                      <th>Deed Type</th>
+                      <th>Vendor</th>
+                      <th>Purchaser</th>
+                      <th>Area</th>
+                      <th>Consideration</th>
+                      <th>Continuity</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Subtab: Mutation -->
+            <div class="panel-body record-subtab-content" id="subtab-mutation" style="display:none;">
+              <h3 style="font-family:'Outfit',sans-serif; margin-bottom:14px; color:#fff;">Assistant Commissioner (Land) Mutation Cases, DCR & Jamabandi</h3>
+              <div class="table-responsive">
+                <table class="data-table" id="mutation-table">
+                  <thead>
+                    <tr>
+                      <th>Case No</th>
+                      <th>AC Land Circle</th>
+                      <th>Applicant</th>
+                      <th>Plot BS</th>
+                      <th>Applied / Approved</th>
+                      <th>Mutation Khatian & DCR</th>
+                      <th>Order Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Subtab: Tax -->
+            <div class="panel-body record-subtab-content" id="subtab-tax" style="display:none;">
+              <h3 style="font-family:'Outfit',sans-serif; margin-bottom:14px; color:#fff;">Land Development Tax (LD Tax / Dakhila) Payment Ledger</h3>
+              <div class="table-responsive">
+                <table class="data-table" id="tax-table">
+                  <thead>
+                    <tr>
+                      <th>Receipt ID</th>
+                      <th>Holding & Mouza</th>
+                      <th>Plot No</th>
+                      <th>Tax Payer</th>
+                      <th>Fiscal Year</th>
+                      <th>Receipt No</th>
+                      <th>Amount Paid</th>
+                      <th>Compliance</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 3: GIS & MOUZA MAPPING
+             ==================================================================== -->
+        <section class="view-section" id="gis-view">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>🛰️ Interactive Geospatial GIS & Boundary Overlay</span>
+              </div>
+              <div class="panel-actions">
+                <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                  📥 Load KML File
+                  <input type="file" id="kml-file-input" accept=".kml" style="display:none;" onchange="
+                    if (this.files[0]) {
+                      const reader = new FileReader();
+                      reader.onload = (e) => {
+                        const res = window.gisManager.loadKMLString(e.target.result);
+                        if (res.success) {
+                          window.app.showToast('KML successfully plotted on map!', 'success');
+                        } else {
+                          window.app.showToast('KML Error: ' + res.error, 'danger');
+                        }
+                      };
+                      reader.readAsText(this.files[0]);
+                    }
+                  ">
+                </label>
+                <button class="btn btn-primary btn-sm" onclick="window.gisManager.focusParcel('PRC-001')">Target PRC-001</button>
+                <button class="btn btn-danger btn-sm" onclick="window.gisManager.focusParcel('PRC-002')">Target Disputed PRC-002</button>
+              </div>
+            </div>
+            <div class="panel-body" style="padding:16px;">
+              <div id="gis-map-canvas"></div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:12px; color:#94a3b8;">
+                <div style="display:flex; gap:20px;">
+                  <span>🟢 <strong>Green Polygon</strong>: Clear Title Boundary</span>
+                  <span>🔴 <strong>Red Dashed</strong>: Contested Overlap Zone (2.5 Decimals)</span>
+                  <span>🔵 <strong>Cyan Dots</strong>: DGPS RTK Benchmarks</span>
+                </div>
+                <div>Coordinate System: <strong>WGS 84 (EPSG:4326)</strong></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 4: SATELLITE OSINT & HISTORICAL SLIDER
+             ==================================================================== -->
+        <section class="view-section" id="satellite-view">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>🛰️ Temporal Remote Sensing Split-Comparison Slider</span>
+              </div>
+              <div class="panel-actions">
+                <span class="tag-badge verified">Interactive Drag-to-Compare</span>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="satellite-slider-wrapper" id="satellite-slider-wrapper">
+                <!-- Before Layer (2010) -->
+                <div class="slider-image-layer slider-before-layer">
+                  <div class="slider-badge slider-badge-before">DEC 2010 (VIRGIN NAL FARMLAND)</div>
+                  <canvas id="canvas-before-2010" class="slider-canvas"></canvas>
+                </div>
+
+                <!-- After Layer (2025) -->
+                <div class="slider-image-layer slider-after-layer">
+                  <div class="slider-badge slider-badge-after">FEB 2025 (ENCLOSED LOT & ROAD)</div>
+                  <canvas id="canvas-after-2025" class="slider-canvas"></canvas>
+                </div>
+
+                <!-- Draggable Divider Handle -->
+                <div class="slider-handle">⇄</div>
+              </div>
+
+              <div style="margin-top:20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:18px;">
+                <h4 style="color:#fff; font-family:'Outfit',sans-serif; margin-bottom:6px;">OSINT Temporal Evidentiary Findings</h4>
+                <p style="font-size:13px; color:#cbd5e1; line-height:1.6;">
+                  Satellite comparison unequivocally refutes adverse possession claims made in Title Suit No. 142/2024. In the <strong>2010 CNES/Airbus capture</strong>, the entire area was low-lying agricultural land without physical occupation. The <strong>2025 Maxar WorldView-3 capture</strong> confirms our client constructed the boundary wall and security gate following land filling, and the opponent's tin shed on the northern margin was placed abruptly after March 2024.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 5: FIELD SURVEY STATION
+             ==================================================================== -->
+        <section class="view-section" id="survey-view">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">📍 Ground DGPS RTK Coordinates & Total Station Logs</div>
+            </div>
+            <div class="panel-body">
+              <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:16px; margin-bottom:12px;">DGPS Boundary Monuments (Sub-Centimeter Fix)</h3>
+              <div class="table-responsive" style="margin-bottom:28px;">
+                <table class="data-table" id="waypoints-table">
+                  <thead>
+                    <tr>
+                      <th>Station ID</th>
+                      <th>Latitude (N)</th>
+                      <th>Longitude (E)</th>
+                      <th>Elevation</th>
+                      <th>Description / Monument</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:16px; margin-bottom:12px;">Electronic Total Station (ETS) Distance & Tie-Line Logs</h3>
+              <div class="table-responsive" style="margin-bottom:28px;">
+                <table class="data-table" id="measurements-table">
+                  <thead>
+                    <tr>
+                      <th>Log ID</th>
+                      <th>Station From &rarr; To</th>
+                      <th>Distance (Feet)</th>
+                      <th>Distance (Links)</th>
+                      <th>Bearing (&deg;)</th>
+                      <th>Physical Landmark</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:16px; margin-bottom:12px;">Geotagged Photographic Ground Evidence</h3>
+              <div class="table-responsive">
+                <table class="data-table" id="photos-table">
+                  <thead>
+                    <tr>
+                      <th>Photo ID</th>
+                      <th>Parcel</th>
+                      <th>Subject Description</th>
+                      <th>Coordinates</th>
+                      <th>Camera Bearing</th>
+                      <th>Integrity Status</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 6: DISPUTE MANAGEMENT DOCKET
+             ==================================================================== -->
+        <section class="view-section" id="disputes-view">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">⚖️ Litigation Docket & Court Proceedings</div>
+              <div class="panel-actions">
+                <span class="tag-badge danger">1 Active Civil Suit</span>
+              </div>
+            </div>
+            <div class="panel-body table-responsive">
+              <table class="data-table" id="disputes-table">
+                <thead>
+                  <tr>
+                    <th>Dispute ID</th>
+                    <th>Parcel</th>
+                    <th>Case No & Court</th>
+                    <th>Case Type</th>
+                    <th>Litigating Parties</th>
+                    <th>Injunction Order</th>
+                    <th>Current Stage</th>
+                    <th>Next Hearing</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 7: EVIDENCE VAULT & SHA-256 HASHER
+             ==================================================================== -->
+        <section class="view-section" id="vault-view">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">🛡️ Cryptographic Evidence Vault (Tamper-Proof SHA-256)</div>
+            </div>
+            <div class="panel-body">
+              <!-- Interactive Browser Drag-and-Drop Hasher -->
+              <div class="dropzone-box" id="vault-dropzone">
+                <div class="dropzone-icon">🔒</div>
+                <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:18px; margin-bottom:6px;">Drag & Drop Document to Verify Cryptographic Checksum</h3>
+                <p style="color:#94a3b8; font-size:13px;">Computes client-side SHA-256 hash using native Web Crypto API. No files are transmitted across external networks.</p>
+              </div>
+              <div id="hash-output-display" style="margin-bottom:28px;"></div>
+
+              <!-- Chain of Custody Table -->
+              <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:16px; margin-bottom:12px;">Evidence Chain of Custody Ledger</h3>
+              <div class="table-responsive" style="margin-bottom:28px;">
+                <table class="data-table" id="evidence-table">
+                  <thead>
+                    <tr>
+                      <th>Evidence ID</th>
+                      <th>Document Description</th>
+                      <th>Source Authority</th>
+                      <th>Custodian</th>
+                      <th>SHA-256 Checksum Signature</th>
+                      <th>Vault State</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <!-- Master Legal Chronology -->
+              <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:16px; margin-bottom:12px;">100-Year Master Chronological Legal Matrix</h3>
+              <div class="table-responsive">
+                <table class="data-table" id="chronology-table">
+                  <thead>
+                    <tr>
+                      <th>Year / Date</th>
+                      <th>Category</th>
+                      <th>Event & Factual Record</th>
+                      <th>Evidentiary Weight</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 8: REPORTS & LAND CALCULATOR
+             ==================================================================== -->
+        <section class="view-section" id="reports-view">
+          <!-- Due Diligence Generator -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">📑 12-Point Legal Due Diligence & Title Opinion Generator</div>
+              <div class="panel-actions">
+                <select class="form-control" id="ddr-parcel-select" style="width:200px; padding:6px 12px;">
+                  <option value="PRC-001">Parcel PRC-001 (Badda)</option>
+                  <option value="PRC-002">Parcel PRC-002 (Disputed)</option>
+                  <option value="PRC-003">Parcel PRC-003 (Tejgaon)</option>
+                </select>
+                <button class="btn btn-primary btn-sm" id="btn-generate-ddr">Generate Audit</button>
+                <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Print / Save PDF</button>
+              </div>
+            </div>
+            <div class="panel-body" id="due-diligence-output">
+              <!-- Default initial audit loaded on start -->
+            </div>
+          </div>
+
+          <!-- Multi-unit Converter and 16-Anna Calculator Grid -->
+          <div class="calc-grid">
+            <!-- Box 1: Multi-Unit Land Converter -->
+            <div class="calc-box">
+              <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:17px; margin-bottom:14px;">Multi-Unit Land Converter</h3>
+              <div class="form-group">
+                <label class="form-label">Enter Value:</label>
+                <input type="number" step="any" class="form-control" id="calc-input-val" value="14.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Input Unit:</label>
+                <select class="form-control" id="calc-input-unit">
+                  <option value="decimal" selected>Decimal (Shatak / Shotangsho)</option>
+                  <option value="katha">Katha (Standard 720 sq ft)</option>
+                  <option value="bigha">Bigha (20 Katha)</option>
+                  <option value="acre">Acre (100 Decimals)</option>
+                  <option value="sqft">Square Feet</option>
+                  <option value="sqm">Square Metres</option>
+                  <option value="hectare">Hectare</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="btn-calc-convert" style="width:100%;">Convert Units</button>
+
+              <table class="conversion-result-table">
+                <tr><td>Decimals (Shatak):</td><td id="res-decimals">14.5000</td></tr>
+                <tr><td>Katha (Standard):</td><td id="res-katha">8.7725</td></tr>
+                <tr><td>Bigha (Standard):</td><td id="res-bigha">0.4386</td></tr>
+                <tr><td>Acres:</td><td id="res-acres">0.1450</td></tr>
+                <tr><td>Square Feet (Sq. Ft):</td><td id="res-sqft">6,316.20</td></tr>
+                <tr><td>Square Metres (Sq. m):</td><td id="res-sqm">586.79</td></tr>
+              </table>
+            </div>
+
+            <!-- Box 2: Traditional 16-Anna Share Calculator -->
+            <div class="calc-box">
+              <h3 style="font-family:'Outfit',sans-serif; color:#fff; font-size:17px; margin-bottom:14px;">16-Anna Inheritance Share Calculator</h3>
+              <div class="form-group">
+                <label class="form-label">Total Plot Area (Decimals):</label>
+                <input type="number" step="any" class="form-control" id="anna-tot-dec" value="14.5">
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:8px;" class="form-group">
+                <div>
+                  <label class="form-label">Anna</label>
+                  <input type="number" class="form-control" id="anna-val" value="4">
+                </div>
+                <div>
+                  <label class="form-label">Ganda</label>
+                  <input type="number" class="form-control" id="ganda-val" value="10">
+                </div>
+                <div>
+                  <label class="form-label">Kara</label>
+                  <input type="number" class="form-control" id="kara-val" value="0">
+                </div>
+                <div>
+                  <label class="form-label">Kranti</label>
+                  <input type="number" class="form-control" id="kranti-val" value="0">
+                </div>
+                <div>
+                  <label class="form-label">Til</label>
+                  <input type="number" class="form-control" id="til-val" value="0">
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btn-calc-anna" style="width:100%;">Calculate Fractional Share</button>
+
+              <table class="conversion-result-table">
+                <tr><td>Share Percentage:</td><td id="anna-res-pct">28.1250%</td></tr>
+                <tr><td>Allocated Decimals:</td><td id="anna-res-dec">4.0781 Dec</td></tr>
+                <tr><td>Allocated Katha:</td><td id="anna-res-katha">2.4673 Katha</td></tr>
+                <tr><td>Allocated Sq. Feet:</td><td id="anna-res-sqft">1,776.43 Sq. Ft</td></tr>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             VIEW 9: ADMIN & DATABASE MANAGEMENT
+             ==================================================================== -->
+        <section class="view-section" id="admin-view">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">⚙️ Repository Database Administration & Backup</div>
+            </div>
+            <div class="panel-body">
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-bottom:28px;">
+                <div class="calc-box">
+                  <h4 style="color:#fff; font-family:'Outfit',sans-serif; margin-bottom:8px;">Database Backup (Export JSON)</h4>
+                  <p style="color:#94a3b8; font-size:13px; margin-bottom:14px;">Download a complete offline JSON snapshot of all parcels, khatians, deeds, mutations, taxes, and dispute dockets.</p>
+                  <button class="btn btn-primary" onclick="window.AdminManager.exportDatabase()">💾 Export Database Snapshot</button>
+                </div>
+
+                <div class="calc-box">
+                  <h4 style="color:#fff; font-family:'Outfit',sans-serif; margin-bottom:8px;">Database Restore (Import JSON)</h4>
+                  <p style="color:#94a3b8; font-size:13px; margin-bottom:14px;">Restore or migrate records from a previously saved JSON snapshot.</p>
+                  <label class="btn btn-secondary" style="cursor:pointer;">
+                    📂 Select JSON File
+                    <input type="file" accept=".json" style="display:none;" onchange="
+                      if (this.files[0]) window.AdminManager.importDatabase(this.files[0]);
+                    ">
+                  </label>
+                </div>
+
+                <div class="calc-box">
+                  <h4 style="color:#f87171; font-family:'Outfit',sans-serif; margin-bottom:8px;">Reset to Factory Defaults</h4>
+                  <p style="color:#94a3b8; font-size:13px; margin-bottom:14px;">Clear local storage customizations and reload the verified seed database.</p>
+                  <button class="btn btn-danger" onclick="window.AdminManager.resetDatabase()">⚠️ Reset to Default Data</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: ADD NEW PARCEL
+       ==================================================================== -->
+  <div class="modal-overlay" id="add-parcel-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">+ Add New Land Parcel to Master Register</div>
+        <button class="modal-close-btn" onclick="window.AdminManager.closeModal('add-parcel-modal')">&times;</button>
+      </div>
+      <form onsubmit="window.AdminManager.handleParcelSubmit(event)">
+        <div class="modal-body">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="form-group">
+              <label class="form-label">Parcel ID (e.g. PRC-004):</label>
+              <input type="text" name="parcelId" class="form-control" required placeholder="PRC-004">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mouza Name:</label>
+              <input type="text" name="mouza" class="form-control" required placeholder="Badda / Tejgaon">
+            </div>
+            <div class="form-group">
+              <label class="form-label">J.L. Number:</label>
+              <input type="number" name="jlNo" class="form-control" required value="4">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Thana / Upazila:</label>
+              <input type="text" name="thana" class="form-control" required value="Badda">
+            </div>
+            <div class="form-group">
+              <label class="form-label">District:</label>
+              <input type="text" name="district" class="form-control" required value="Dhaka">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Area in Decimals:</label>
+              <input type="number" step="any" name="areaDecimal" class="form-control" required placeholder="15.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CS Plot (Dag):</label>
+              <input type="text" name="plotCS" class="form-control" placeholder="402">
+            </div>
+            <div class="form-group">
+              <label class="form-label">SA Plot (Dag):</label>
+              <input type="text" name="plotSA" class="form-control" placeholder="402">
+            </div>
+            <div class="form-group">
+              <label class="form-label">RS Plot (Dag):</label>
+              <input type="text" name="plotRS" class="form-control" placeholder="851">
+            </div>
+            <div class="form-group">
+              <label class="form-label">BS / City Plot (Dag):</label>
+              <input type="text" name="plotBS" class="form-control" placeholder="1204">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CS Khatian:</label>
+              <input type="text" name="khatianCS" class="form-control" placeholder="112">
+            </div>
+            <div class="form-group">
+              <label class="form-label">SA Khatian:</label>
+              <input type="text" name="khatianSA" class="form-control" placeholder="245">
+            </div>
+            <div class="form-group">
+              <label class="form-label">RS Khatian:</label>
+              <input type="text" name="khatianRS" class="form-control" placeholder="512">
+            </div>
+            <div class="form-group">
+              <label class="form-label">BS Khatian:</label>
+              <input type="text" name="khatianBS" class="form-control" placeholder="1084">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Land Class:</label>
+              <select name="landClass" class="form-control">
+                <option value="Nal (Agricultural)">Nal (Agricultural)</option>
+                <option value="Viti (Homestead)">Viti (Homestead)</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Chala">Chala</option>
+                <option value="Doba / Low-land">Doba / Low-land</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Dispute Status:</label>
+              <select name="status" class="form-control">
+                <option value="CLEAR">CLEAR</option>
+                <option value="DISPUTE_FLAGGED">DISPUTE_FLAGGED</option>
+                <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Recorded Owner:</label>
+              <input type="text" name="owner" class="form-control" required placeholder="Owner Name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current Possessor:</label>
+              <input type="text" name="possessor" class="form-control" required placeholder="Possessor Name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mutation Case No:</label>
+              <input type="text" name="mutationCase" class="form-control" placeholder="MUT-2024-XXXX">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mutation Khatian No:</label>
+              <input type="text" name="mutationKhatian" class="form-control" placeholder="845">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Latest Tax Cleared Year:</label>
+              <input type="text" name="taxYear" class="form-control" placeholder="1432 BS">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Latitude (GPS):</label>
+              <input type="number" step="any" name="lat" class="form-control" value="23.7845">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Longitude (GPS):</label>
+              <input type="number" step="any" name="lng" class="form-control" value="90.4267">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label class="form-label">Remarks / Description:</label>
+            <textarea name="remarks" class="form-control" rows="2" placeholder="Title and physical boundary notes..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="window.AdminManager.closeModal('add-parcel-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Parcel to Register</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Modular Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/gis.js"></script>
+  <script src="js/satellite-slider.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/due-diligence.js"></script>
+  <script src="js/vault.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
